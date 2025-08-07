@@ -1,0 +1,11 @@
+[project]
+name = "eikonal-path-planning"
+version = "0.1.0"
+description = "Eikonal PDE based obstacle avoidance path planning"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.21.0",
+    "matplotlib>=3.5.0",
+    "scipy>=1.7.0",
+]

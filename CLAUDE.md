@@ -1,0 +1,2 @@
+- 环境配置使用 uv
+- 用 uv run python
