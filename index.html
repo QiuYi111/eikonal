@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eikonal PDE Path Planning</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-route"></i>
+                    <h1>Eikonal PDE Path Planner</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="calculateBtn">
+                        <i class="fas fa-calculator"></i>
+                        Calculate Path
+                    </button>
+                    <button class="btn btn-secondary" id="clearBtn">
+                        <i class="fas fa-trash"></i>
+                        Clear All
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Canvas Area -->
+            <div class="canvas-section">
+                <div class="canvas-header">
+                    <h3>Interactive Map</h3>
+                    <div class="canvas-controls">
+                        <button class="btn btn-sm" id="startPointBtn">
+                            <i class="fas fa-play-circle"></i>
+                            Start Point
+                        </button>
+                        <button class="btn btn-sm" id="endPointBtn">
+                            <i class="fas fa-flag-checkered"></i>
+                            End Point
+                        </button>
+                        <button class="btn btn-sm active" id="obstacleBtn">
+                            <i class="fas fa-square"></i>
+                            Obstacles
+                        </button>
+                    </div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="mapCanvas" width="800" height="600"></canvas>
+                    <div class="canvas-overlay">
+                        <div id="coordinates" class="coordinates-display">0, 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="panel-section">
+                    <h3>Parameters</h3>
+                    <div class="parameter-group">
+                        <label for="resolutionSlider">Grid Resolution</label>
+                        <input type="range" id="resolutionSlider" min="0.05" max="0.5" step="0.05" value="0.1">
+                        <span id="resolutionValue">0.1</span>
+                    </div>
+                    <div class="parameter-group">
+                        <label for="obstacleSpeed">Obstacle Speed Factor</label>
+                        <input type="range" id="obstacleSpeed" min="0.001" max="0.5" step="0.001" value="0.001">
+                        <span id="obstacleSpeedValue">0.001</span>
+                    </div>
+                    <div class="parameter-group">
+                        <label for="smoothRadius">Smoothing Radius</label>
+                        <input type="range" id="smoothRadius" min="0.1" max="1.0" step="0.1" value="0.3">
+                        <span id="smoothRadiusValue">0.3</span>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Obstacle Types</h3>
+                    <div class="obstacle-types">
+                        <button class="obstacle-btn active" data-type="rectangle">
+                            <i class="fas fa-square"></i>
+                            Rectangle
+                        </button>
+                        <button class="obstacle-btn" data-type="circle">
+                            <i class="fas fa-circle"></i>
+                            Circle
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Visualization</h3>
+                    <div class="visualization-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showVelocity" checked>
+                            <span>Show Velocity Field</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showDistance" checked>
+                            <span>Show Distance Field</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showPath" checked>
+                            <span>Show Optimal Path</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Statistics</h3>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Path Length:</span>
+                            <span id="pathLength">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Computation Time:</span>
+                            <span id="computationTime">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Grid Points:</span>
+                            <span id="gridPoints">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Calculating optimal path...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="eikonal-solver.js"></script>
+    <script src="canvas-manager.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
