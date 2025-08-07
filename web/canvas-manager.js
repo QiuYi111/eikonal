@@ -426,9 +426,18 @@ class CanvasManager {
         const path = this.solver.extractPath(this.solver.startPoint, this.solver.endPoint);
         if (path.length === 0) return;
         
-        this.ctx.strokeStyle = this.colors.path;
-        this.ctx.lineWidth = 3;
-        this.ctx.setLineDash([5, 5]);
+        // High contrast path with glow effect
+        this.ctx.strokeStyle = '#ff1744'; // Bright red for high contrast
+        this.ctx.lineWidth = 4;
+        this.ctx.setLineDash([4, 2]);
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+        
+        // Draw glow effect
+        this.ctx.shadowColor = '#ff1744';
+        this.ctx.shadowBlur = 6;
+        this.ctx.shadowOffsetX = 0;
+        this.ctx.shadowOffsetY = 0;
         
         this.ctx.beginPath();
         for (let i = 0; i < path.length; i++) {
@@ -444,6 +453,9 @@ class CanvasManager {
         }
         this.ctx.stroke();
         
+        // Reset shadow
+        this.ctx.shadowColor = 'transparent';
+        this.ctx.shadowBlur = 0;
         this.ctx.setLineDash([]);
     }
     

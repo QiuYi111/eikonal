@@ -101,8 +101,20 @@ class EikonalSolver {
                 const px = this.x[j];
                 const py = this.y[i];
                 
+                // Check if point is inside rectangle
                 if (px >= x && px <= x + width && py >= y && py <= y + height) {
                     this.velocityField[i][j] = this.obstacleSpeed;
+                } else {
+                    // Calculate distance to rectangle for smoothing
+                    const dx = Math.max(0, Math.max(x - px, px - (x + width)));
+                    const dy = Math.max(0, Math.max(y - py, py - (y + height)));
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Apply smoothing
+                    if (distance <= this.smoothRadius) {
+                        const factor = distance / this.smoothRadius;
+                        this.velocityField[i][j] = Math.max(this.obstacleSpeed, this.obstacleSpeed + (1 - this.obstacleSpeed) * factor);
+                    }
                 }
             }
         }
@@ -121,7 +133,7 @@ class EikonalSolver {
                     this.velocityField[i][j] = this.obstacleSpeed;
                 } else if (distance <= radius + this.smoothRadius) {
                     const factor = (distance - radius) / this.smoothRadius;
-                    this.velocityField[i][j] = Math.max(this.obstacleSpeed, factor);
+                    this.velocityField[i][j] = Math.max(this.obstacleSpeed, this.obstacleSpeed + (1 - this.obstacleSpeed) * factor);
                 }
             }
         }
