@@ -32,14 +32,14 @@ class CanvasManager {
         };
         
         this.colors = {
-            background: '#f8f9fa',
-            grid: '#e9ecef',
-            obstacles: '#6c757d',
-            start: '#28a745',
-            end: '#dc3545',
-            path: '#667eea',
-            velocity: ['#e3f2fd', '#1976d2'],
-            distance: ['#fff3e0', '#ff6f00']
+            background: '#0f0f23',
+            grid: '#2a2a3e',
+            obstacles: '#ff4757',
+            start: '#00ff88',
+            end: '#ffd700',
+            path: '#00d4ff',
+            velocity: ['#0066ff', '#ff0000'],
+            distance: ['#000033', '#ff0000']
         };
         
         this.init();
@@ -316,16 +316,51 @@ class CanvasManager {
         const cellWidth = this.scaleX * this.solver.resolution;
         const cellHeight = this.scaleY * this.solver.resolution;
         
+        // Create heatmap with smooth gradient
         for (let i = 0; i < velocityField.length; i++) {
             for (let j = 0; j < velocityField[i].length; j++) {
                 const value = velocityField[i][j];
-                const intensity = (value - this.solver.obstacleSpeed) / (1 - this.solver.obstacleSpeed);
                 
-                const r = Math.floor(230 - intensity * 100);
-                const g = Math.floor(240 - intensity * 120);
-                const b = Math.floor(250 - intensity * 50);
+                // Normalize to 0-1 range
+                const normalized = (value - this.solver.obstacleSpeed) / (1 - this.solver.obstacleSpeed);
                 
-                this.ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                // Create heatmap colors: blue (fast) -> cyan -> green -> yellow -> red (slow)
+                let r, g, b;
+                if (normalized < 0.2) {
+                    // Blue to cyan
+                    const t = normalized / 0.2;
+                    r = Math.floor(0 + t * 0);
+                    g = Math.floor(100 + t * 155);
+                    b = Math.floor(255 + t * 0);
+                } else if (normalized < 0.4) {
+                    // Cyan to green
+                    const t = (normalized - 0.2) / 0.2;
+                    r = Math.floor(0 + t * 0);
+                    g = Math.floor(255 + t * 0);
+                    b = Math.floor(255 - t * 255);
+                } else if (normalized < 0.6) {
+                    // Green to yellow
+                    const t = (normalized - 0.4) / 0.2;
+                    r = Math.floor(0 + t * 255);
+                    g = Math.floor(255 + t * 0);
+                    b = Math.floor(0 + t * 0);
+                } else if (normalized < 0.8) {
+                    // Yellow to orange
+                    const t = (normalized - 0.6) / 0.2;
+                    r = Math.floor(255 + t * 0);
+                    g = Math.floor(255 - t * 100);
+                    b = Math.floor(0 + t * 0);
+                } else {
+                    // Orange to red
+                    const t = (normalized - 0.8) / 0.2;
+                    r = Math.floor(255 + t * 0);
+                    g = Math.floor(155 - t * 155);
+                    b = Math.floor(0 + t * 0);
+                }
+                
+                // Add alpha for transparency
+                const alpha = 0.7 + normalized * 0.3;
+                this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
                 this.ctx.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
             }
         }

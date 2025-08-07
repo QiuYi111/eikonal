@@ -7,7 +7,7 @@ class EikonalSolver {
     constructor(width = 10, height = 8) {
         this.width = width;
         this.height = height;
-        this.resolution = 0.1;
+        this.resolution = 0.05; // Fixed optimized resolution
         this.obstacleSpeed = 0.001;
         this.smoothRadius = 0.3;
         
@@ -37,9 +37,9 @@ class EikonalSolver {
     }
     
     setResolution(resolution) {
-        this.resolution = resolution;
-        this.initializeGrid();
-        this.updateObstacles();
+        // Resolution is now fixed at 0.05 for optimal performance
+        // This method is kept for backward compatibility but does nothing
+        return;
     }
     
     setObstacleSpeed(speed) {
@@ -237,53 +237,98 @@ class EikonalSolver {
             return [];
         }
         
-        const path = [];
+        const rawPath = [];
         const maxSteps = this.nx * this.ny;
         let steps = 0;
         
+        // Sub-pixel gradient descent for smoother paths
         const neighbors = [
             [-1, -1], [-1, 0], [-1, 1],
             [0, -1],           [0, 1],
             [1, -1],  [1, 0],  [1, 1]
         ];
         
+        let currentX = startX;
+        let currentY = startY;
+        
         while (steps < maxSteps) {
-            path.push([this.x[j], this.y[i]]);
+            rawPath.push([currentX, currentY]);
             
-            // Check if reached end
-            const endJ = Math.floor(endX / this.resolution);
-            const endI = Math.floor(endY / this.resolution);
-            
-            if (Math.abs(i - endI) <= 1 && Math.abs(j - endJ) <= 1) {
-                path.push([endX, endY]);
+            // Check if we've reached the end
+            const distanceToEnd = Math.sqrt((currentX - endX) ** 2 + (currentY - endY) ** 2);
+            if (distanceToEnd < this.resolution * 1.5) {
+                rawPath.push([endX, endY]);
                 break;
             }
             
-            // Find gradient descent direction
-            let minDistance = this.distanceField[i][j];
-            let nextI = i, nextJ = j;
+            // Sub-pixel gradient descent
+            const gridX = Math.floor(currentX / this.resolution);
+            const gridY = Math.floor(currentY / this.resolution);
             
-            for (const [di, dj] of neighbors) {
-                const ni = i + di;
-                const nj = j + dj;
+            let minDistance = this.distanceField[gridY][gridX];
+            let bestDirectionX = 0;
+            let bestDirectionY = 0;
+            let bestDistance = minDistance;
+            
+            // Find best gradient direction with sub-pixel precision
+            for (const [dy, dx] of neighbors) {
+                const ny = gridY + dy;
+                const nx = gridX + dx;
                 
-                if (ni < 0 || ni >= this.ny || nj < 0 || nj >= this.nx) continue;
+                if (nx < 0 || nx >= this.nx || ny < 0 || ny >= this.ny) continue;
                 
-                if (this.distanceField[ni][nj] < minDistance) {
-                    minDistance = this.distanceField[ni][nj];
-                    nextI = ni;
-                    nextJ = nj;
+                if (this.distanceField[ny][nx] < bestDistance) {
+                    bestDistance = this.distanceField[ny][nx];
+                    bestDirectionX = dx;
+                    bestDirectionY = dy;
                 }
             }
             
-            if (nextI === i && nextJ === j) break;
+            if (bestDirectionX === 0 && bestDirectionY === 0) break;
             
-            i = nextI;
-            j = nextJ;
+            // Move in gradient direction with adaptive step size
+            const stepSize = this.resolution * 0.5; // Smaller steps for smoother path
+            currentX += bestDirectionX * stepSize;
+            currentY += bestDirectionY * stepSize;
+            
+            // Keep within bounds
+            currentX = Math.max(0, Math.min(this.width - this.resolution, currentX));
+            currentY = Math.max(0, Math.min(this.height - this.resolution, currentY));
+            
             steps++;
         }
         
-        return path;
+        if (rawPath.length < 2) return [];
+        
+        // Apply path smoothing using Catmull-Rom spline
+        return this.smoothPath(rawPath);
+    }
+    
+    smoothPath(rawPath) {
+        if (rawPath.length < 3) return rawPath;
+        
+        const smoothPath = [];
+        const smoothingFactor = 0.3; // Adjust for more/less smoothing
+        
+        // Add the start point
+        smoothPath.push(rawPath[0]);
+        
+        for (let i = 1; i < rawPath.length - 1; i++) {
+            const prev = rawPath[i - 1];
+            const curr = rawPath[i];
+            const next = rawPath[i + 1];
+            
+            // Catmull-Rom interpolation
+            const x = curr[0] + (next[0] - prev[0]) * smoothingFactor;
+            const y = curr[1] + (next[1] - prev[1]) * smoothingFactor;
+            
+            smoothPath.push([x, y]);
+        }
+        
+        // Add the end point
+        smoothPath.push(rawPath[rawPath.length - 1]);
+        
+        return smoothPath;
     }
     
     getGridInfo() {

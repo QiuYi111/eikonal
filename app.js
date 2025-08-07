@@ -58,16 +58,6 @@ class PathPlanningApp {
     }
     
     setupParameterControls() {
-        // Resolution slider
-        const resolutionSlider = document.getElementById('resolutionSlider');
-        const resolutionValue = document.getElementById('resolutionValue');
-        resolutionSlider.addEventListener('input', (e) => {
-            const value = parseFloat(e.target.value);
-            resolutionValue.textContent = value;
-            this.solver.setResolution(value);
-            this.canvasManager.draw();
-        });
-        
         // Obstacle speed slider
         const obstacleSpeedSlider = document.getElementById('obstacleSpeed');
         const obstacleSpeedValue = document.getElementById('obstacleSpeedValue');
@@ -90,7 +80,6 @@ class PathPlanningApp {
     setupVisualizationControls() {
         const checkboxes = [
             'showVelocity',
-            'showDistance',
             'showPath'
         ];
         
@@ -205,7 +194,7 @@ class PathPlanningApp {
         const defaultConfig = {
             width: 10,
             height: 8,
-            resolution: 0.1,
+            resolution: 0.05, // Fixed optimized resolution
             obstacleSpeed: 0.001,
             smoothRadius: 0.3,
             obstacles: [
